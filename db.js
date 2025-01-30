@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-mongoose.set('strictQuery, false');
+mongoose.set('strictQuery', false);
 
 const mongoDB = process.env.REACT_APP_DB_KEY;
 
