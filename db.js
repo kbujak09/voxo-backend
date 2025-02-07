@@ -3,7 +3,7 @@ require('dotenv').config();
 
 mongoose.set('strictQuery', false);
 
-const mongoDB = process.env.REACT_APP_DB_KEY;
+const mongoDB = process.env.DB_KEY;
 
 async function connectDB () {
   try {
