@@ -1,6 +1,9 @@
 const express = require('express');
 const connectDB = require('./db');
 
+const usersRouter = require('./routes/users');
+const authRouter = require('./routes/auth');
+
 const app = express();
 const PORT = 5000;
 
@@ -14,3 +17,6 @@ app.listen(PORT, (error) => {
     console.log("Error occurred, server can't start");
   }
 });
+
+app.use('/', usersRouter);
+app.use('/', authRouter);
