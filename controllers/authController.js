@@ -77,13 +77,15 @@ exports.login = (req, res, next) => {
       });
     }
 
-    req.login(user, { session: false }, (err) => {
+    const token = req.login(user, { session: false }, (err) => {
       if (err) {
         next(err);
       }
-      const json = jwt.sign(user.toJSON(), process.env.JWT_SECRET);
-      return res.json({user, token});
-    })
-  })
-  (req, res);
+
+      const data = jwt.sign(user.toJSON(), process.env.JWT_SECRET);
+      return data;
+    });
+
+    return res.status(200).json({token, user});
+  })(req, res, next);
 }

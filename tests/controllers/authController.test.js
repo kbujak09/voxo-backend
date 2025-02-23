@@ -23,7 +23,7 @@ jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
 jest.mock('passport');
 
-describe('Auth controller', () => {
+describe('Auth controller - signup', () => {
   const originalFindOne = User.findOne;
 
   beforeEach(async () => {
@@ -31,7 +31,7 @@ describe('Auth controller', () => {
     User.findOne = originalFindOne;
   });
 
-  describe('Signup', () => {
+  describe('Signup - functionality', () => {
     it('should create a new user successfully', async () => {
       const req = {
         body: {
@@ -325,5 +325,88 @@ describe('Auth controller', () => {
         ])
       });
     });
+  });
+});
+
+describe('Auth controller - login', () => {
+  let mockUser;
+
+  beforeEach(async () => {
+    User.findOne = jest.fn();
+    passport.authenticate = jest.fn();
+    bcrypt.compare = jest.fn();
+    jwt.sign = jest.fn();
+
+    mockUser = new User({
+      username: 'testuser',
+      password: 'testpassword'
+    });
+
+    await mockUser.save();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should successfully login and return a JWT token', async () => {
+    passport.authenticate = jest.fn().mockImplementation((strategy, options, callback) => {
+      return (req, res, next) => callback(null, mockUser);
+    });
+
+    jwt.sign.mockReturnValue('mockToken');
+
+    const req = {
+      body: {
+        username: 'testuser',
+        password: 'testpassword',
+      },
+      login: jest.fn().mockImplementation((user, options, cb) => cb())
+    }
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+
+    const next = jest.fn();
+
+    authController.login(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      token: 'mockToken',
+      user: mockUser
+    });
+  });
+
+  it('should return 400 when valid credentials not provided', async () => {
+    passport.authenticate = jest.fn().mockImplementation((strategy, options, callback) => {
+      return (req, res, next) => callback(null, null, { message: 'Invalid credentials'});
+    });
+
+    const req = {
+      body: {
+        username: 'notvaliduser',
+        password: 'notvalidpassword'
+      },
+      login: jest.fn().mockImplementation((user, options, cb) => cb())
+    }
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+
+    const next = jest.fn();
+
+    authController.login(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Invalid credentials'
+      }),
+    );
   });
 });
