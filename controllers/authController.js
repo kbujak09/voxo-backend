@@ -28,10 +28,10 @@ exports.signup = [
     .escape(),
   body('confirmPassword', 'Passwords do not match.')
     .custom((value, { req }) => value === req.body.password),
-
+  
   asyncHandler(async (req, res, next) => {
     const existingUser = await User.findOne({ username: { $regex: new RegExp(`^${req.body.username}$`, 'i') } });
-
+    
     if (existingUser) {
       return res.status(403).json({
         username: req.body.username,
@@ -39,8 +39,7 @@ exports.signup = [
       });
     };
 
-    const errors = validationResult(req);   
-
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(403).json({
         username: req.body.username,
@@ -53,7 +52,6 @@ exports.signup = [
         username: req.body.username,
         password: hashedPassword
       });
-
       if (err) {
         return next(err);
       }

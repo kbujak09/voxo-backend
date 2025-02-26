@@ -12,6 +12,7 @@ beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
   await mongoose.connect(mongoUri);
+  console.log('MongoDB connected!')
 });
 
 afterAll(async () => {
@@ -59,7 +60,7 @@ describe('Auth controller - signup', () => {
       expect(user).not.toBeNull();
       expect(user.password).toBe('hashedpassword');
     });
-
+    
     it('return status 403 when user exists', async () => {
       const req = {
         body: {
